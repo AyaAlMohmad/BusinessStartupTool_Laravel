@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 
 class MarketResearch extends Model
 {
+    use Auditable;
     protected $fillable = [
         'target_customer_name',
         'age',
@@ -13,7 +15,8 @@ class MarketResearch extends Model
         'education',
         'must_have_solutions',
         'should_have_solutions',
-        'nice_to_have_solutions','user_id'
+        'nice_to_have_solutions','user_id',
+        'business_id'
     ];
 
     protected $casts = [
@@ -24,5 +27,9 @@ class MarketResearch extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+    public function business()
+    {
+        return $this->belongsTo(Business::class);
     }
 }

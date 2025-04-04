@@ -1,12 +1,14 @@
 <?php
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 
 class MVPDevelopment extends Model
 {
+    use Auditable;
     protected $table = 'mvp_developments';
-protected $fillable=['user_id'];
+protected $fillable=['user_id','business_id'];
     public function features()
     {
         return $this->hasOne(Feature::class,'mvp_development_id');
@@ -14,6 +16,10 @@ protected $fillable=['user_id'];
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+    public function business()
+    {
+        return $this->belongsTo(Business::class);
     }
     public function assumptions()
     {

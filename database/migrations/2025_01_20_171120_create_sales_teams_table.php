@@ -16,10 +16,13 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id'); 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreignId('sales_strategy_id')->constrained()->onDelete('cascade');
-            $table->string('role');
-            $table->string('responsibilities');
-            $table->string('required_skills');
-            $table->string('target_metrics');
+            $table->unsignedBigInteger('business_id'); 
+            $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
+
+            $table->string('role')->nullable();
+            $table->string('responsibilities')->nullable();
+            $table->string('required_skills')->nullable();
+            $table->string('target_metrics')->nullable();
             $table->timestamps();
         });
     }

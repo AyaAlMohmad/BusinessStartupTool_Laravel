@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\BusinessController;
 use App\Http\Controllers\API\FinancialPlanningController;
 use App\Http\Controllers\API\BusinessIdeaController;
 use App\Http\Controllers\API\BusinessSetupController;
@@ -44,6 +45,9 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::apiResource('businesses', BusinessController::class);
+    Route::get('businesses/{business}/logs', [BusinessController::class, 'showLogs']);
+
 // Business Idea Routes
 Route::prefix('business-ideas')->group(function() {
     Route::get('/', [BusinessIdeaController::class, 'index']);

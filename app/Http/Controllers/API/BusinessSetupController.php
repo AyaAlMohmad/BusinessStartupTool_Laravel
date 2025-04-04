@@ -2,15 +2,19 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\Business;
 use App\Models\BusinessSetup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use Symfony\Component\HttpFoundation\Response;
 class BusinessSetupController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $businessId = $this->getValidatedBusinessId($request);
+        
         $latestSetup = BusinessSetup::where('user_id', Auth::id())
+            ->where('business_id', $businessId)
             ->with(['licenses', 'locations', 'insurances'])
             ->latest()
             ->first();
@@ -41,13 +45,14 @@ class BusinessSetupController extends Controller
             'insurance.*.coverage' => 'nullable|string',
             'insurance.*.annual_cost' => 'nullable|numeric',
         ]);
-
+        $businessId = $this->getValidatedBusinessId($request);
       
         $data['user_id'] = Auth::id();
-
+        $data['business_id'] = $businessId;
        
         $businessSetup = BusinessSetup::create([
             'user_id' => $data['user_id'],
+            'business_id'=>$data['business_id'],
                 'business_type' => $data['legal_structure']['business_type'],
             'requirements' => $data['legal_structure']['requirements'],
             'timeline' => $data['legal_structure']['timeline'],
@@ -58,6 +63,7 @@ class BusinessSetupController extends Controller
         if (isset($data['licenses_and_permits'])) {
             foreach ($data['licenses_and_permits'] as $licenseData) {
                 $licenseData['user_id'] = $data['user_id'];
+                $licenseData['business_id'] = $data['business_id'];
                 $businessSetup->licenses()->create($licenseData);
             }
         }
@@ -65,6 +71,7 @@ class BusinessSetupController extends Controller
         if (isset($data['locations'])) {
             foreach ($data['locations'] as $locationData) {
                 $locationData['user_id'] = $data['user_id'];
+                $locationData['business_id'] = $data['business_id'];
                 $businessSetup->locations()->create($locationData);
             }
         }
@@ -73,6 +80,7 @@ class BusinessSetupController extends Controller
         if (isset($data['insurance'])) {
             foreach ($data['insurance'] as $insuranceData) {
                 $insuranceData['user_id'] = $data['user_id'];
+                $insuranceData['business_id'] = $data['business_id'];
                 $businessSetup->insurances()->create($insuranceData);
             }
         }
@@ -82,9 +90,17 @@ class BusinessSetupController extends Controller
 
     public function show($id)
     {
-        $businessSetup = BusinessSetup::with(['licenses', 'locations', 'insurances'])->findOrFail($id);
+        $businessId = $this->getValidatedBusinessId(request());
+        
+        $businessSetup = BusinessSetup::where('id', $id)
+            ->where('business_id', $businessId)
+            ->where('user_id', Auth::id())
+            ->with(['licenses', 'locations', 'insurances'])
+            ->firstOrFail();
+
         return response()->json($businessSetup, 200);
     }
+
 
     public function update(Request $request, $id)
     {
@@ -109,10 +125,14 @@ class BusinessSetupController extends Controller
             'insurance.*.coverage' => 'sometimes|nullable|string',
             'insurance.*.annual_cost' => 'sometimes|nullable|numeric',
         ]);
-    
-        $businessSetup = BusinessSetup::findOrFail($id);
-    
-        // تحديث BusinessSetup
+        $businessId = $this->getValidatedBusinessId($request);
+     
+        $businessSetup = BusinessSetup::where('id', $id)
+            ->where('business_id', $businessId)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+            $data['business_id'] = $businessId;
+        
         $businessSetup->update([
             'business_type' => $data['legal_structure']['business_type'] ?? $businessSetup->business_type,
             'requirements' => $data['legal_structure']['requirements'] ?? $businessSetup->requirements,
@@ -120,29 +140,32 @@ class BusinessSetupController extends Controller
             'setup_costs' => $data['legal_structure']['setup_costs'] ?? $businessSetup->setup_costs,
         ]);
     
-        // تحديث أو إنشاء Licenses
+        
         if (isset($data['licenses_and_permits'])) {
             $businessSetup->licenses()->delete();
             foreach ($data['licenses_and_permits'] as $licenseData) {
-                $licenseData['user_id'] = Auth::id(); // تعيين user_id
+                $licenseData['user_id'] = Auth::id();
+                $licenseData['business_id'] =   $data['business_id'];
                 $businessSetup->licenses()->create($licenseData);
             }
         }
     
-        // تحديث أو إنشاء Locations
+      
         if (isset($data['locations'])) {
             $businessSetup->locations()->delete();
             foreach ($data['locations'] as $locationData) {
-                $locationData['user_id'] = Auth::id(); // تعيين user_id
+                $locationData['user_id'] = Auth::id();
+                $locationData['business_id'] =   $data['business_id'];
                 $businessSetup->locations()->create($locationData);
             }
         }
     
-        // تحديث أو إنشاء Insurances
+  
         if (isset($data['insurance'])) {
             $businessSetup->insurances()->delete();
             foreach ($data['insurance'] as $insuranceData) {
-                $insuranceData['user_id'] = Auth::id(); // تعيين user_id
+                $insuranceData['user_id'] = Auth::id();
+                $insuranceData['business_id'] =   $data['business_id'];
                 $businessSetup->insurances()->create($insuranceData);
             }
         }
@@ -151,8 +174,32 @@ class BusinessSetupController extends Controller
     }
     public function destroy($id)
     {
-        $businessSetup = BusinessSetup::findOrFail($id);
+        $businessId = $this->getValidatedBusinessId(request());
+        
+        $businessSetup = BusinessSetup::where('id', $id)
+            ->where('business_id', $businessId)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
         $businessSetup->delete();
         return response()->json(null, 204);
     }
+    private function getValidatedBusinessId(Request $request)
+    {
+        $businessId = $request->header('business_id');
+        
+        if (!$businessId) {
+            abort(Response::HTTP_UNPROCESSABLE_ENTITY, 'Missing business_id header');
+        }
+        
+        $business = Business::where('id', $businessId)
+            ->where('user_id', Auth::id())
+            ->first();
+
+        if (!$business) {
+            abort(Response::HTTP_FORBIDDEN, 'Unauthorized access to business');
+        }
+
+        return $businessId;
+    }
+
 }

@@ -15,10 +15,14 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id'); 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->json('skills_experience');
-            $table->json('passions_interests');
-            $table->json('values_goals');
-            $table->json('business_ideas');
+            $table->unsignedBigInteger('business_id'); 
+            $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
+
+            $table->json('skills_experience')->nullable();
+            $table->json('passions_interests')->nullable();
+            $table->json('values_goals')->nullable();
+            $table->json('business_ideas')->nullable();
+            $table->json('personal_notes')->nullable();
             $table->timestamps();
         });
     }

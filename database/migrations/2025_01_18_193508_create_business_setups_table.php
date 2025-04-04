@@ -13,13 +13,15 @@ return new class extends Migration
     {
         Schema::create('business_setups', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id'); 
+            $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-        $table->string('business_type');
-    $table->json('requirements');
-    $table->string('timeline');
-    $table->decimal('setup_costs', 10, 2);
-    $table->timestamps();
+            $table->unsignedBigInteger('business_id'); 
+            $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
+            $table->string('business_type');
+            $table->json('requirements');
+            $table->string('timeline');
+            $table->decimal('setup_costs', 10, 2);
+            $table->timestamps();
         });
     }
 

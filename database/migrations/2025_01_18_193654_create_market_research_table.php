@@ -15,13 +15,16 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id'); 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->string('target_customer_name');
+            $table->unsignedBigInteger('business_id'); 
+            $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
+
+            $table->string('target_customer_name')->nullable();
             $table->integer('age')->nullable();
             $table->string('income')->nullable();
             $table->string('education')->nullable();
-            $table->json('must_have_solutions');
-            $table->json('should_have_solutions');
-            $table->json('nice_to_have_solutions');
+            $table->json('must_have_solutions')->nullable();
+            $table->json('should_have_solutions')->nullable();
+            $table->json('nice_to_have_solutions')->nullable();
             $table->timestamps();
         });
     }

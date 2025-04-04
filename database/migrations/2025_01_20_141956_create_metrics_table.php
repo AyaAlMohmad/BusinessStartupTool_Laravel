@@ -16,9 +16,12 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id'); 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreignId('mvp_development_id')->constrained()->onDelete('cascade');
-            $table->string('name');
-            $table->decimal('target_value', 10, 2);
-            $table->decimal('actual_value', 10, 2);
+            $table->unsignedBigInteger('business_id'); 
+            $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
+
+            $table->string('name')->nullable();
+            $table->decimal('target_value', 10, 2)->nullable();
+            $table->decimal('actual_value', 10, 2)->nullable();
             
            
             $table->unsignedBigInteger('section_id')->nullable();

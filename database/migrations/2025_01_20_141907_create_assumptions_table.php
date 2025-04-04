@@ -16,9 +16,12 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id'); 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreignId('mvp_development_id')->constrained()->onDelete('cascade');
-            $table->string('description');
-            $table->string('test_method');
-            $table->string('success_criteria');
+            $table->unsignedBigInteger('business_id'); 
+            $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
+
+            $table->string('description')->nullable();
+            $table->string('test_method')->nullable();
+            $table->string('success_criteria')->nullable();
             $table->timestamps();
         });
     }

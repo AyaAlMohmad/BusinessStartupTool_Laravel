@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 
 class FundingSource extends Model
 {
-    protected $fillable = ['financial_planning_id', 'source', 'type', 'amount', 'status','user_id', 'terms'];
+    use Auditable;
+    protected $fillable = ['financial_planning_id','business_id', 'source', 'type', 'amount', 'status','user_id', 'terms'];
 
     public function financialPlanning()
     {
@@ -15,5 +17,9 @@ class FundingSource extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+    public function business()
+    {
+        return $this->belongsTo(Business::class);
     }
 }

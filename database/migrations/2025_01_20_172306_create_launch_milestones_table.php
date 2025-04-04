@@ -16,9 +16,12 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id'); 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreignId('launch_preparation_id')->constrained()->onDelete('cascade');
-            $table->string('description');
-            $table->date('due_date');
-            $table->string('status');
+            $table->unsignedBigInteger('business_id'); 
+            $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
+
+            $table->string('description')->nullable();
+            $table->date('due_date')->nullable();
+            $table->string('status')->nullable();
             $table->json('dependencies')->nullable();
             $table->timestamps();
         });

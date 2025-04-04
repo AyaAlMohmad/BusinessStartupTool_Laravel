@@ -1,10 +1,13 @@
 <?php
+
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 
 class FinancialPlanning extends Model
 {
+    use Auditable;
     protected $fillable = [
         'startup_costs',
         'funding_sources',
@@ -12,7 +15,8 @@ class FinancialPlanning extends Model
         'expense_projections',
         'breakeven_analysis',
         'cash_flow_projections',
-        'user_id'
+        'user_id',
+        'business_id'
     ];
 
     protected $casts = [
@@ -26,6 +30,10 @@ class FinancialPlanning extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+    public function business()
+    {
+        return $this->belongsTo(Business::class);
     }
     public function startupCosts()
     {

@@ -15,12 +15,15 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id'); 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->json('startup_costs');
-            $table->json('funding_sources');
-            $table->json('revenue_projections');
-            $table->json('expense_projections');
-            $table->json('breakeven_analysis');
-            $table->json('cash_flow_projections');
+            $table->unsignedBigInteger('business_id'); 
+            $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
+
+            $table->json('startup_costs')->nullable();
+            $table->json('funding_sources')->nullable();
+            $table->json('revenue_projections')->nullable();
+            $table->json('expense_projections')->nullable();
+            $table->json('breakeven_analysis')->nullable();
+            $table->json('cash_flow_projections')->nullable();
             $table->timestamps();
         });
     }

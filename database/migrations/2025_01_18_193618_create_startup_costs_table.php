@@ -16,11 +16,14 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id'); 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreignId('financial_planning_id')->constrained()->onDelete('cascade');
-            $table->string('item');
-            $table->string('category');
-            $table->decimal('amount', 15, 2);
-            $table->string('timing');
-            $table->text('notes');
+            $table->unsignedBigInteger('business_id'); 
+            $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
+
+            $table->string('item')->nullable();
+            $table->string('category')->nullable();
+            $table->decimal('amount', 15, 2)->nullable();
+            $table->string('timing')->nullable();
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }

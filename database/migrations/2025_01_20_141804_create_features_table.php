@@ -16,6 +16,9 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id'); 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreignId('mvp_development_id')->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('business_id'); 
+            $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
+
             $table->json('must_have_features')->nullable();
             $table->json('should_have_features')->nullable();
             $table->json('nice_to_have_features')->nullable();

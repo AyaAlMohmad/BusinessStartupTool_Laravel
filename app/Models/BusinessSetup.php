@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Model;
 
 class BusinessSetup extends Model
 {
-    protected $fillable = ['business_type', 'requirements', 'timeline', 'setup_costs','user_id'];
+    use Auditable;
+    protected $fillable = ['business_type','business_id' ,'requirements', 'timeline', 'setup_costs','user_id'];
 
     protected $casts = [
         'requirements' => 'array',
@@ -29,6 +31,10 @@ class BusinessSetup extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+    public function business()
+    {
+        return $this->belongsTo(Business::class);
     }
 }
 
