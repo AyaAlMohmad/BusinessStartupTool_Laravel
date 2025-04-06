@@ -9,10 +9,12 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use App\Mail\PasswordResetMail; // Add this line
+use App\Models\Business;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail; // Add this line
-
+use Symfony\Component\HttpFoundation\Response;
 class PasswordResetController extends Controller
 {
     // public function sendResetLinkEmail(Request $request)
@@ -107,5 +109,25 @@ class PasswordResetController extends Controller
         } else {
             return response()->json(['error' => __($status)], 400);
         }
+    }
+    private function getValidatedBusinessId(Request $request)
+    {
+        $businessId = $request->header('business_id');
+        
+       
+        if (!$businessId) {
+            abort(Response::HTTP_UNPROCESSABLE_ENTITY, 'Missing business_id header');
+        }
+        
+      
+        $business = Business::where('id', $businessId)
+            ->where('user_id', Auth::id())
+            ->first();
+
+        if (!$business) {
+            abort(Response::HTTP_FORBIDDEN, 'Unauthorized access to business');
+        }
+
+        return $businessId;
     }
 }

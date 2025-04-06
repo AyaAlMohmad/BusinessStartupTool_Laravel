@@ -3,15 +3,19 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\Business;
 use App\Models\Marketing;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use Symfony\Component\HttpFoundation\Response;
 class MarketingController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $businessId = $this->getValidatedBusinessId($request);
+
         $latestMarketing = Marketing::where('user_id', Auth::id())
+            ->where('business_id', $businessId)
             ->with(['marketingChannels', 'contentStrategies', 'brandIdentity'])
             ->latest()
             ->first();
@@ -42,11 +46,15 @@ class MarketingController extends Controller
             'brand_identity.tone' => 'nullable|string',
             'brand_identity.visual_style' => 'nullable|string',
         ]);
+
+        $businessId = $this->getValidatedBusinessId($request);
         $validatedData['user_id'] = Auth::id();
+        $validatedData['business_id'] = $businessId;
 
         // إنشاء Marketing
         $marketing = Marketing::create([
             'user_id' => $validatedData['user_id'],
+            'business_id' => $validatedData['business_id'],
             'audience_description' => $validatedData['audience_description'] ?? null,
             'problem_statement' => $validatedData['problem_statement'] ?? null,
             'solution_overview' => $validatedData['solution_overview'] ?? null,
@@ -56,6 +64,7 @@ class MarketingController extends Controller
         if (isset($validatedData['marketing_channels'])) {
             foreach ($validatedData['marketing_channels'] as $channel) {
                 $channel['user_id'] = $validatedData['user_id'];
+                $channel['business_id'] = $validatedData['business_id'];
                 $marketing->marketingChannels()->create($channel);
             }
         }
@@ -64,6 +73,7 @@ class MarketingController extends Controller
         if (isset($validatedData['content_strategies'])) {
             foreach ($validatedData['content_strategies'] as $strategy) {
                 $strategy['user_id'] = $validatedData['user_id'];
+                $strategy['business_id'] = $validatedData['business_id'];
                 $marketing->contentStrategies()->create($strategy);
             }
         }
@@ -71,9 +81,9 @@ class MarketingController extends Controller
         // إنشاء BrandIdentity
         if (isset($validatedData['brand_identity'])) {
             $validatedData['brand_identity']['user_id'] = $validatedData['user_id'];
+            $validatedData['brand_identity']['business_id'] = $validatedData['business_id'];
             $marketing->brandIdentity()->create($validatedData['brand_identity']);
         }
-
 
         return response()->json([
             'message' => 'Marketing plan created successfully',
@@ -83,11 +93,23 @@ class MarketingController extends Controller
 
     public function show($id)
     {
-        return Marketing::with(['marketingChannels', 'contentStrategies', 'brandIdentity'])->findOrFail($id);
+        $businessId = $this->getValidatedBusinessId(request());
+
+        return Marketing::where('id', $id)
+            ->where('business_id', $businessId)
+            ->where('user_id', Auth::id())
+            ->with(['marketingChannels', 'contentStrategies', 'brandIdentity'])
+            ->firstOrFail();
     }
+
     public function update(Request $request, $id)
     {
-        $marketing = Marketing::findOrFail($id);
+        $businessId = $this->getValidatedBusinessId($request);
+        
+        $marketing = Marketing::where('id', $id)
+            ->where('business_id', $businessId)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
     
         $validatedData = $request->validate([
             'audience_description' => 'sometimes|nullable|string',
@@ -120,7 +142,8 @@ class MarketingController extends Controller
         if (isset($validatedData['marketing_channels'])) {
             $marketing->marketingChannels()->delete();
             foreach ($validatedData['marketing_channels'] as $channel) {
-                $channel['user_id'] = auth()->id(); // إضافة user_id
+                $channel['user_id'] = Auth::id();
+                $channel['business_id'] = $businessId;
                 $marketing->marketingChannels()->create($channel);
             }
         }
@@ -128,14 +151,16 @@ class MarketingController extends Controller
         if (isset($validatedData['content_strategies'])) {
             $marketing->contentStrategies()->delete();
             foreach ($validatedData['content_strategies'] as $strategy) {
-                $strategy['user_id'] = auth()->id(); // إضافة user_id
+                $strategy['user_id'] = Auth::id();
+                $strategy['business_id'] = $businessId;
                 $marketing->contentStrategies()->create($strategy);
             }
         }
     
         if (isset($validatedData['brand_identity'])) {
             $brandIdentityData = $validatedData['brand_identity'];
-            $brandIdentityData['user_id'] = auth()->id(); // إضافة user_id
+            $brandIdentityData['user_id'] = Auth::id();
+            $brandIdentityData['business_id'] = $businessId;
             $marketing->brandIdentity()->updateOrCreate([], $brandIdentityData);
         }
     
@@ -147,7 +172,34 @@ class MarketingController extends Controller
 
     public function destroy($id)
     {
-        Marketing::destroy($id);
+        $businessId = $this->getValidatedBusinessId(request());
+
+        Marketing::where('id', $id)
+            ->where('business_id', $businessId)
+            ->where('user_id', Auth::id())
+            ->delete();
+
         return response()->json(['message' => 'Marketing strategy deleted successfully'], 204);
+    }
+
+    private function getValidatedBusinessId(Request $request)
+    {
+        $businessId = $request->header('business_id');
+        
+       
+        if (!$businessId) {
+            abort(Response::HTTP_UNPROCESSABLE_ENTITY, 'Missing business_id header');
+        }
+        
+      
+        $business = Business::where('id', $businessId)
+            ->where('user_id', Auth::id())
+            ->first();
+
+        if (!$business) {
+            abort(Response::HTTP_FORBIDDEN, 'Unauthorized access to business');
+        }
+
+        return $businessId;
     }
 }

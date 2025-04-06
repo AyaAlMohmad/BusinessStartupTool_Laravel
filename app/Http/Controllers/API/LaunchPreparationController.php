@@ -3,15 +3,19 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\Business;
 use App\Models\LaunchPreparation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use Symfony\Component\HttpFoundation\Response;
 class LaunchPreparationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $businessId = $this->getValidatedBusinessId($request);
+
         $latestPreparation = LaunchPreparation::where('user_id', Auth::id())
+            ->where('business_id', $businessId)
             ->with(['launchChecklists', 'marketingActivities', 'riskAssessments', 'launchMilestones'])
             ->latest()
             ->first();
@@ -48,16 +52,21 @@ class LaunchPreparationController extends Controller
             'launch_milestones.*.dependencies' => 'nullable|array',
         ]);
 
-    // إضافة user_id للمستخدم الحالي
+    $businessId = $this->getValidatedBusinessId($request);
     $validatedData['user_id'] = Auth::id();
+    $validatedData['business_id'] = $businessId;
 
     // إنشاء LaunchPreparation
-    $launchPreparation = LaunchPreparation::create(['user_id' => $validatedData['user_id']]);
+    $launchPreparation = LaunchPreparation::create([
+        'user_id' => $validatedData['user_id'],
+        'business_id' => $validatedData['business_id']
+    ]);
 
     // إنشاء LaunchChecklists
     if (isset($validatedData['launch_checklists'])) {
         foreach ($validatedData['launch_checklists'] as $checklist) {
             $checklist['user_id'] = $validatedData['user_id'];
+            $checklist['business_id'] = $validatedData['business_id'];
             $launchPreparation->launchChecklists()->create($checklist);
         }
     }
@@ -66,6 +75,7 @@ class LaunchPreparationController extends Controller
     if (isset($validatedData['marketing_activities'])) {
         foreach ($validatedData['marketing_activities'] as $activity) {
             $activity['user_id'] = $validatedData['user_id'];
+            $activity['business_id'] = $validatedData['business_id'];
             $launchPreparation->marketingActivities()->create($activity);
         }
     }
@@ -74,6 +84,7 @@ class LaunchPreparationController extends Controller
     if (isset($validatedData['risk_assessments'])) {
         foreach ($validatedData['risk_assessments'] as $risk) {
             $risk['user_id'] = $validatedData['user_id'];
+            $risk['business_id'] = $validatedData['business_id'];
             $launchPreparation->riskAssessments()->create($risk);
         }
     }
@@ -82,6 +93,7 @@ class LaunchPreparationController extends Controller
     if (isset($validatedData['launch_milestones'])) {
         foreach ($validatedData['launch_milestones'] as $milestone) {
             $milestone['user_id'] = $validatedData['user_id'];
+            $milestone['business_id'] = $validatedData['business_id'];
             $launchPreparation->launchMilestones()->create($milestone);
         }
     }
@@ -94,13 +106,25 @@ class LaunchPreparationController extends Controller
 
     public function show($id)
     {
-        $launchPreparation = LaunchPreparation::with(['launchChecklists', 'marketingActivities', 'riskAssessments', 'launchMilestones'])->findOrFail($id);
+        $businessId = $this->getValidatedBusinessId(request());
+
+        $launchPreparation = LaunchPreparation::where('id', $id)
+            ->where('business_id', $businessId)
+            ->where('user_id', Auth::id())
+            ->with(['launchChecklists', 'marketingActivities', 'riskAssessments', 'launchMilestones'])
+            ->firstOrFail();
+
         return response()->json($launchPreparation, 200);
     }
 
     public function update(Request $request, $id)
     {
-        $launchPreparation = LaunchPreparation::findOrFail($id);
+        $businessId = $this->getValidatedBusinessId($request);
+
+        $launchPreparation = LaunchPreparation::where('id', $id)
+            ->where('business_id', $businessId)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
     
         $validatedData = $request->validate([
             'launch_checklists' => 'nullable|array',
@@ -133,7 +157,8 @@ class LaunchPreparationController extends Controller
         if (isset($validatedData['launch_checklists'])) {
             $launchPreparation->launchChecklists()->delete();
             foreach ($validatedData['launch_checklists'] as $checklist) {
-                $checklist['user_id'] = Auth::id(); // تعيين user_id
+                $checklist['user_id'] = Auth::id();
+                $checklist['business_id'] = $businessId;
                 $launchPreparation->launchChecklists()->create($checklist);
             }
         }
@@ -142,7 +167,8 @@ class LaunchPreparationController extends Controller
         if (isset($validatedData['marketing_activities'])) {
             $launchPreparation->marketingActivities()->delete();
             foreach ($validatedData['marketing_activities'] as $activity) {
-                $activity['user_id'] = Auth::id(); // تعيين user_id
+                $activity['user_id'] = Auth::id();
+                $activity['business_id'] = $businessId;
                 $launchPreparation->marketingActivities()->create($activity);
             }
         }
@@ -151,7 +177,8 @@ class LaunchPreparationController extends Controller
         if (isset($validatedData['risk_assessments'])) {
             $launchPreparation->riskAssessments()->delete();
             foreach ($validatedData['risk_assessments'] as $risk) {
-                $risk['user_id'] = Auth::id(); // تعيين user_id
+                $risk['user_id'] = Auth::id();
+                $risk['business_id'] = $businessId;
                 $launchPreparation->riskAssessments()->create($risk);
             }
         }
@@ -160,7 +187,8 @@ class LaunchPreparationController extends Controller
         if (isset($validatedData['launch_milestones'])) {
             $launchPreparation->launchMilestones()->delete();
             foreach ($validatedData['launch_milestones'] as $milestone) {
-                $milestone['user_id'] = Auth::id(); // تعيين user_id
+                $milestone['user_id'] = Auth::id();
+                $milestone['business_id'] = $businessId;
                 $launchPreparation->launchMilestones()->create($milestone);
             }
         }
@@ -173,7 +201,35 @@ class LaunchPreparationController extends Controller
 
     public function destroy($id)
     {
-        LaunchPreparation::destroy($id);
+        $businessId = $this->getValidatedBusinessId(request());
+
+        $launchPreparation = LaunchPreparation::where('id', $id)
+            ->where('business_id', $businessId)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        $launchPreparation->delete();
         return response()->json(['message' => 'Launch preparation deleted successfully'], 204);
+    }
+
+    private function getValidatedBusinessId(Request $request)
+    {
+        $businessId = $request->header('business_id');
+        
+       
+        if (!$businessId) {
+            abort(Response::HTTP_UNPROCESSABLE_ENTITY, 'Missing business_id header');
+        }
+        
+      
+        $business = Business::where('id', $businessId)
+            ->where('user_id', Auth::id())
+            ->first();
+
+        if (!$business) {
+            abort(Response::HTTP_FORBIDDEN, 'Unauthorized access to business');
+        }
+
+        return $businessId;
     }
 }

@@ -21,10 +21,17 @@ return new class extends Migration
             $table->string('target_customer_name')->nullable();
             $table->integer('age')->nullable();
             $table->string('income')->nullable();
+            $table->string('employment')->nullable();
+            $table->string('gender')->nullable();
+            $table->string('other')->nullable();
             $table->string('education')->nullable();
             $table->json('must_have_solutions')->nullable();
             $table->json('should_have_solutions')->nullable();
             $table->json('nice_to_have_solutions')->nullable();
+            $table->json('help_persona')->nullable();
+            $table->json('problem')->nullable();
+            $table->json('solution')->nullable();
+            $table->json('nots')->nullable();
             $table->timestamps();
         });
     }

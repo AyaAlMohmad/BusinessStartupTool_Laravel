@@ -3,19 +3,23 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\Business;
 use App\Models\MarketResearch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use Symfony\Component\HttpFoundation\Response;
 class MarketResearchController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
    
-        public function index()
+        public function index(Request $request)
         {
+            $businessId = $this->getValidatedBusinessId($request);
+
             $latestResearch = MarketResearch::where('user_id', Auth::id())
+                ->where('business_id', $businessId)
                 ->latest()
                 ->first();
 
@@ -37,13 +41,24 @@ class MarketResearchController extends Controller
         $validatedData = $request->validate([
             'target_customer_name' => 'nullable|string',
             'age' => 'nullable|integer',
+            'gender' => 'nullable|string',
+            'other' => 'nullable|string',
+            'employment' => 'nullable|string',
             'income' => 'nullable|numeric',
             'education' => 'nullable|string',
             'must_have_solutions' => 'nullable|array',
             'should_have_solutions' => 'nullable|array',
             'nice_to_have_solutions' => 'nullable|array',
+            'nots'=> 'nullable|array',
+            'solution'=> 'nullable|array',
+            'problem'=> 'nullable|array',
+            'help_persona'=> 'nullable|array',
         ]);
+
+        $businessId = $this->getValidatedBusinessId($request);
         $validatedData['user_id'] = Auth::id();
+        $validatedData['business_id'] = $businessId;
+        
         $marketResearch = MarketResearch::create($validatedData);
 
         return response()->json(['message' => 'Market research created successfully', 'data' => $marketResearch], 201);
@@ -54,7 +69,14 @@ class MarketResearchController extends Controller
      */
     public function show($id)
     {
-        return MarketResearch::findOrFail($id);
+        $businessId = $this->getValidatedBusinessId(request());
+
+        $marketResearch = MarketResearch::where('id', $id)
+            ->where('business_id', $businessId)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        return response()->json($marketResearch, 200);
     }
 
     /**
@@ -62,16 +84,28 @@ class MarketResearchController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $marketResearch = MarketResearch::findOrFail($id);
+        $businessId = $this->getValidatedBusinessId($request);
+
+        $marketResearch = MarketResearch::where('id', $id)
+            ->where('business_id', $businessId)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
 
         $validatedData = $request->validate([
-            'target_customer_name' => 'sometimes|nullable|string',
+            'target_customer_name' => 'nullable|string',
             'age' => 'nullable|integer',
+            'gender' => 'nullable|string',
+            'other' => 'nullable|string',
+            'employment' => 'nullable|string',
             'income' => 'nullable|numeric',
             'education' => 'nullable|string',
             'must_have_solutions' => 'nullable|array',
             'should_have_solutions' => 'nullable|array',
             'nice_to_have_solutions' => 'nullable|array',
+            'nots'=> 'nullable|array',
+            'solution'=> 'nullable|array',
+            'problem'=> 'nullable|array',
+            'help_persona'=> 'nullable|array',
         ]);
 
         $marketResearch->update($validatedData);
@@ -85,8 +119,33 @@ class MarketResearchController extends Controller
      */
     public function destroy($id)
         {
-            MarketResearch::destroy($id);
+            $businessId = $this->getValidatedBusinessId(request());
+
+            MarketResearch::where('id', $id)
+                ->where('business_id', $businessId)
+                ->where('user_id', Auth::id())
+                ->delete();
     
             return response()->json(['message' => 'Market research deleted successfully'], 204);
+        }
+        private function getValidatedBusinessId(Request $request)
+        {
+            $businessId = $request->header('business_id');
+            
+           
+            if (!$businessId) {
+                abort(Response::HTTP_UNPROCESSABLE_ENTITY, 'Missing business_id header');
+            }
+            
+          
+            $business = Business::where('id', $businessId)
+                ->where('user_id', Auth::id())
+                ->first();
+    
+            if (!$business) {
+                abort(Response::HTTP_FORBIDDEN, 'Unauthorized access to business');
+            }
+    
+            return $businessId;
         }
 }

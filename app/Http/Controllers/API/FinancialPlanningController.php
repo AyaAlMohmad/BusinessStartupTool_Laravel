@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\Business;
 use App\Models\FinancialPlanning;
 use App\Models\FundingSource;
 use App\Models\RevenueProjection;
@@ -10,7 +11,7 @@ use App\Models\ExpenseProjection;
 use App\Models\StartupCost;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use Symfony\Component\HttpFoundation\Response;
 class FinancialPlanningController extends Controller
 {
     // Store Financial Planning Data
@@ -25,8 +26,11 @@ class FinancialPlanningController extends Controller
             'cash_flow_projections' => 'nullable|array',
         ]);
 
-        // Add user_id to main data array
+        $businessId = $this->getValidatedBusinessId($request);
+
+        // Add user_id and business_id to main data array
         $data['user_id'] = Auth::id();
+        $data['business_id'] = $businessId;
 
         // Create a new FinancialPlanning record
         $financialPlanning = FinancialPlanning::create($data);
@@ -34,21 +38,25 @@ class FinancialPlanningController extends Controller
         // Save the related models
         foreach ($data['startup_costs'] as $cost) {
             $cost['user_id'] = $data['user_id'];
+            $cost['business_id'] = $businessId;
             $financialPlanning->startupCosts()->create($cost);
         }
 
         foreach ($data['funding_sources'] as $source) {
             $source['user_id'] = $data['user_id'];
+            $source['business_id'] = $businessId;
             $financialPlanning->fundingSources()->create($source);
         }
 
         foreach ($data['revenue_projections'] as $projection) {
             $projection['user_id'] = $data['user_id'];
+            $projection['business_id'] = $businessId;
             $financialPlanning->revenueProjections()->create($projection);
         }
 
         foreach ($data['expense_projections'] as $projection) {
             $projection['user_id'] = $data['user_id'];
+            $projection['business_id'] = $businessId;
             $financialPlanning->expenseProjections()->create($projection);
         }
 
@@ -57,8 +65,13 @@ class FinancialPlanningController extends Controller
 
     public function update(Request $request, $id)
     {
-        // Check if the record exists
-        $financialPlanning = FinancialPlanning::find($id);
+        $businessId = $this->getValidatedBusinessId($request);
+
+        // Check if the record exists and belongs to user/business
+        $financialPlanning = FinancialPlanning::where('id', $id)
+            ->where('business_id', $businessId)
+            ->where('user_id', Auth::id())
+            ->first();
     
         if (!$financialPlanning) {
             return response()->json([
@@ -89,6 +102,7 @@ class FinancialPlanningController extends Controller
         if (isset($data['startup_costs'])) {
             foreach ($data['startup_costs'] as $cost) {
                 $cost['user_id'] = Auth::id();
+                $cost['business_id'] = $businessId;
                 $financialPlanning->startupCosts()->create($cost);
             }
         }
@@ -96,6 +110,7 @@ class FinancialPlanningController extends Controller
         if (isset($data['funding_sources'])) {
             foreach ($data['funding_sources'] as $source) {
                 $source['user_id'] = Auth::id();
+                $source['business_id'] = $businessId;
                 $financialPlanning->fundingSources()->create($source);
             }
         }
@@ -103,6 +118,7 @@ class FinancialPlanningController extends Controller
         if (isset($data['revenue_projections'])) {
             foreach ($data['revenue_projections'] as $projection) {
                 $projection['user_id'] = Auth::id();
+                $projection['business_id'] = $businessId;
                 $financialPlanning->revenueProjections()->create($projection);
             }
         }
@@ -110,6 +126,7 @@ class FinancialPlanningController extends Controller
         if (isset($data['expense_projections'])) {
             foreach ($data['expense_projections'] as $projection) {
                 $projection['user_id'] = Auth::id();
+                $projection['business_id'] = $businessId;
                 $financialPlanning->expenseProjections()->create($projection);
             }
         }
@@ -118,9 +135,12 @@ class FinancialPlanningController extends Controller
     }
 
     // Get Financial Planning Data
-    public function index()
+    public function index(Request $request)
     {
+        $businessId = $this->getValidatedBusinessId($request);
+
         $latestPlanning = FinancialPlanning::where('user_id', Auth::id())
+            ->where('business_id', $businessId)
             ->with([
                 'startupCosts',
                 'fundingSources', 
@@ -136,13 +156,39 @@ class FinancialPlanningController extends Controller
     // Get a specific Financial Planning Data by ID
     public function show($id)
     {
-        $financialPlanning = FinancialPlanning::with([
-            'startupCosts',
-            'fundingSources',
-            'revenueProjections',
-            'expenseProjections'
-        ])->findOrFail($id);
+        $businessId = $this->getValidatedBusinessId(request());
+
+        $financialPlanning = FinancialPlanning::where('id', $id)
+            ->where('business_id', $businessId)
+            ->where('user_id', Auth::id())
+            ->with([
+                'startupCosts',
+                'fundingSources',
+                'revenueProjections',
+                'expenseProjections'
+            ])
+            ->firstOrFail();
 
         return response()->json($financialPlanning, 200);
+    }
+    private function getValidatedBusinessId(Request $request)
+    {
+        $businessId = $request->header('business_id');
+        
+       
+        if (!$businessId) {
+            abort(Response::HTTP_UNPROCESSABLE_ENTITY, 'Missing business_id header');
+        }
+        
+      
+        $business = Business::where('id', $businessId)
+            ->where('user_id', Auth::id())
+            ->first();
+
+        if (!$business) {
+            abort(Response::HTTP_FORBIDDEN, 'Unauthorized access to business');
+        }
+
+        return $businessId;
     }
 }

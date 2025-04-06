@@ -3,15 +3,19 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\Business;
 use App\Models\MVPDevelopment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use Symfony\Component\HttpFoundation\Response;
 class MVPDevelopmentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $businessId = $this->getValidatedBusinessId($request);
+
         $latestDevelopment = MVPDevelopment::where('user_id', Auth::id())
+            ->where('business_id', $businessId)
             ->with(['features.metrics', 'assumptions.metrics', 'timelines.metrics'])
             ->latest()
             ->first();
@@ -21,8 +25,13 @@ class MVPDevelopmentController extends Controller
     
     public function show($id)
     {
-        $mvpDevelopment = MVPDevelopment::with(['features.metrics', 'assumptions.metrics', 'timelines.metrics'])
-            ->findOrFail($id);
+        $businessId = $this->getValidatedBusinessId(request());
+
+        $mvpDevelopment = MVPDevelopment::where('id', $id)
+            ->where('business_id', $businessId)
+            ->where('user_id', Auth::id())
+            ->with(['features.metrics', 'assumptions.metrics', 'timelines.metrics'])
+            ->firstOrFail();
     
         return response()->json($mvpDevelopment, 200);
     }
@@ -54,13 +63,19 @@ class MVPDevelopmentController extends Controller
             'timelines.*.metrics.*.actual_value' => 'nullable|numeric',
         ]);
     
+        $businessId = $this->getValidatedBusinessId($request);
         $validatedData['user_id'] = Auth::id();
+        $validatedData['business_id'] = $businessId;
     
-        $mvpDevelopment = MVPDevelopment::create(['user_id' => $validatedData['user_id']]);
+        $mvpDevelopment = MVPDevelopment::create([
+            'user_id' => $validatedData['user_id'],
+            'business_id' => $validatedData['business_id']
+        ]);
     
          if (isset($validatedData['features'])) {
             $featuresData = $validatedData['features'];
             $featuresData['user_id'] = $validatedData['user_id'];
+            $featuresData['business_id'] = $validatedData['business_id'];
             $features = $mvpDevelopment->features()->create($featuresData);
     
             if (isset($featuresData['metrics'])) {
@@ -68,6 +83,7 @@ class MVPDevelopmentController extends Controller
                     $metric['section_id'] = $features->id;
                     $metric['section_type'] = 'features';
                     $metric['user_id'] = $validatedData['user_id'];
+                    $metric['business_id'] = $validatedData['business_id'];
                     $mvpDevelopment->metrics()->create($metric);
                 }
             }
@@ -76,6 +92,7 @@ class MVPDevelopmentController extends Controller
         if (isset($validatedData['assumptions'])) {
             foreach ($validatedData['assumptions'] as $assumption) {
                 $assumption['user_id'] = $validatedData['user_id'];
+                $assumption['business_id'] = $validatedData['business_id'];
                 $assumptionRecord = $mvpDevelopment->assumptions()->create($assumption);
     
                 if (isset($assumption['metrics'])) {
@@ -83,6 +100,7 @@ class MVPDevelopmentController extends Controller
                         $metric['section_id'] = $assumptionRecord->id;
                         $metric['section_type'] = 'assumptions';
                         $metric['user_id'] = $validatedData['user_id'];
+                        $metric['business_id'] = $validatedData['business_id'];
                         $mvpDevelopment->metrics()->create($metric);
                     }
                 }
@@ -92,6 +110,7 @@ class MVPDevelopmentController extends Controller
         if (isset($validatedData['timelines'])) {
             foreach ($validatedData['timelines'] as $timeline) {
                 $timeline['user_id'] = $validatedData['user_id'];
+                $timeline['business_id'] = $validatedData['business_id'];
                 $timelineRecord = $mvpDevelopment->timelines()->create($timeline);
     
                 if (isset($timeline['metrics'])) {
@@ -99,6 +118,7 @@ class MVPDevelopmentController extends Controller
                         $metric['section_id'] = $timelineRecord->id;
                         $metric['section_type'] = 'timelines';
                         $metric['user_id'] = $validatedData['user_id'];
+                        $metric['business_id'] = $validatedData['business_id'];
                         $mvpDevelopment->metrics()->create($metric);
                     }
                 }
@@ -111,7 +131,12 @@ class MVPDevelopmentController extends Controller
 
     public function update(Request $request, $id)
     {
-        $mvpDevelopment = MVPDevelopment::findOrFail($id);
+        $businessId = $this->getValidatedBusinessId($request);
+
+        $mvpDevelopment = MVPDevelopment::where('id', $id)
+            ->where('business_id', $businessId)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
     
         $validatedData = $request->validate([
             'features.must_have_features' => 'nullable|array',
@@ -147,6 +172,7 @@ class MVPDevelopmentController extends Controller
                     $metric['section_id'] = $features->id;
                     $metric['section_type'] = 'features';
                     $metric['user_id'] = Auth::id();
+                    $metric['business_id'] = $businessId;
                     $mvpDevelopment->metrics()->create($metric);
                 }
             }
@@ -155,12 +181,14 @@ class MVPDevelopmentController extends Controller
             $mvpDevelopment->assumptions()->delete();
             foreach ($validatedData['assumptions'] as $assumption) {
                 $assumption['user_id'] = Auth::id();
+                $assumption['business_id'] = $businessId;
                 $assumptionRecord = $mvpDevelopment->assumptions()->create($assumption);
       if (isset($assumption['metrics'])) {
                     foreach ($assumption['metrics'] as $metric) {
                         $metric['section_id'] = $assumptionRecord->id;
                         $metric['section_type'] = 'assumptions';
                         $metric['user_id'] = Auth::id();
+                        $metric['business_id'] = $businessId;
                         $mvpDevelopment->metrics()->create($metric);
                     }
                 }
@@ -170,12 +198,14 @@ class MVPDevelopmentController extends Controller
             $mvpDevelopment->timelines()->delete();
             foreach ($validatedData['timelines'] as $timeline) {
                 $timeline['user_id'] = Auth::id();
+                $timeline['business_id'] = $businessId;
                 $timelineRecord = $mvpDevelopment->timelines()->create($timeline);
        if (isset($timeline['metrics'])) {
                     foreach ($timeline['metrics'] as $metric) {
                         $metric['section_id'] = $timelineRecord->id;
                         $metric['section_type'] = 'timelines';
                         $metric['user_id'] = Auth::id();
+                        $metric['business_id'] = $businessId;
                         $mvpDevelopment->metrics()->create($metric);
                     }
                 }
@@ -190,7 +220,34 @@ class MVPDevelopmentController extends Controller
 
     public function destroy($id)
     {
-        MVPDevelopment::destroy($id);
+        $businessId = $this->getValidatedBusinessId(request());
+
+        $mvpDevelopment = MVPDevelopment::where('id', $id)
+            ->where('business_id', $businessId)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        $mvpDevelopment->delete();
         return response()->json(['message' => 'MVP development deleted successfully'], 204);
+    }
+    private function getValidatedBusinessId(Request $request)
+    {
+        $businessId = $request->header('business_id');
+        
+       
+        if (!$businessId) {
+            abort(Response::HTTP_UNPROCESSABLE_ENTITY, 'Missing business_id header');
+        }
+        
+      
+        $business = Business::where('id', $businessId)
+            ->where('user_id', Auth::id())
+            ->first();
+
+        if (!$business) {
+            abort(Response::HTTP_FORBIDDEN, 'Unauthorized access to business');
+        }
+
+        return $businessId;
     }
 }

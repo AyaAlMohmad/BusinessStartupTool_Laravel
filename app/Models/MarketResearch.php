@@ -16,6 +16,13 @@ class MarketResearch extends Model
         'must_have_solutions',
         'should_have_solutions',
         'nice_to_have_solutions','user_id',
+            'gender',
+        'other',
+        'employment',
+        'nots',
+        'solution',
+        'problem',
+        'help_persona',
         'business_id'
     ];
 
@@ -23,6 +30,10 @@ class MarketResearch extends Model
         'must_have_solutions' => 'array',
         'should_have_solutions' => 'array',
         'nice_to_have_solutions' => 'array',
+        'nots'=>'array',
+        'solution'=>'array',
+        'problem'=>'array',
+        'help_persona'=>'array',
     ];
     public function user()
     {
