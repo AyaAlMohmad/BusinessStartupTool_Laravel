@@ -16,6 +16,8 @@ use App\Http\Controllers\API\MVPDevelopmentController;
 use App\Http\Controllers\API\SalesStrategyController;
 use App\Http\Controllers\API\VideoController;
 use App\Http\Controllers\API\PasswordResetController;
+use App\Http\Controllers\API\TestingYourIdeaController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -47,7 +49,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanc
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('businesses', BusinessController::class);
     Route::get('businesses/{business}/logs', [BusinessController::class, 'showLogs']);
-
+    Route::apiResource('testing-ideas', TestingYourIdeaController::class);
 // Business Idea Routes
 Route::prefix('business-ideas')->group(function() {
     Route::get('/', [BusinessIdeaController::class, 'index']);
