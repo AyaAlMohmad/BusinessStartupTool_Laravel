@@ -16,6 +16,7 @@ use App\Http\Controllers\API\MVPDevelopmentController;
 use App\Http\Controllers\API\SalesStrategyController;
 use App\Http\Controllers\API\VideoController;
 use App\Http\Controllers\API\PasswordResetController;
+use App\Http\Controllers\API\SimpleSolutionController;
 use App\Http\Controllers\API\TestingYourIdeaController;
 
 /*
@@ -56,6 +57,15 @@ Route::prefix('business-ideas')->group(function() {
       Route::get('/{id}', [BusinessIdeaController::class, 'show']);
       Route::put('/{id}', [BusinessIdeaController::class, 'update']);
     Route::post('/', [BusinessIdeaController::class, 'store']);
+});
+
+
+Route::prefix('simple-solutions')->middleware('auth:sanctum')->group(function () {
+    Route::get('/', [SimpleSolutionController::class, 'index']);           // عرض أحدث سجل
+    Route::post('/', [SimpleSolutionController::class, 'store']);          // إنشاء جديد
+    Route::get('/{id}', [SimpleSolutionController::class, 'show']);        // عرض سجل واحد
+    Route::put('/{id}', [SimpleSolutionController::class, 'update']);      // تعديل سجل
+    Route::delete('/{id}', [SimpleSolutionController::class, 'destroy']);  // حذف سجل
 });
 
 Route::get('/download-business-data', [DownloadController::class, 'downloadBusinessData']);

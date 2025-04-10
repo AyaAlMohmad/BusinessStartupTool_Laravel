@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class TestingYourIdea extends Model
 {
     use HasFactory;
+    use Auditable;
 protected $table='testing_your_idea';
     protected $fillable = [
         'user_id',

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\BusinessIdeaController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
@@ -63,6 +64,8 @@ Route::get('/Progress', [ProgressAnalyticsController::class, 'index'])->name('Pr
     Route::patch('/{id}/status', [UserController::class, 'changeStatus'])->name('changeStatus'); 
     // Route::delete('/{id}', [UserController::class, 'destroy'])->name('destroy'); 
     Route::resource('users', UserController::class);
+    Route::resource('business-ideas', BusinessIdeaController::class);
+    Route::get('/admin/business-ideas/analysis', [BusinessIdeaController::class, 'analysis'])->name('ideas.analysis');
 
 });
 

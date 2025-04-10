@@ -1,4 +1,5 @@
-<x-app-layout>
+@extends('layouts.app')
+@section('content')
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -165,24 +166,24 @@
         .modal .btn {
             border-radius: 5px;
         }
-        
+
         .video-preview {
-            width: 150px; 
-            height: 100px; 
-            object-fit: cover; 
-            border-radius: 8px; 
+            width: 150px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
         }
     </style>
 
     <div class="container">
-       
+
 
         <div class="search-bar">
             <input type="text" id="searchInput" placeholder="Search users..." onkeyup="searchTable()" />
-       <button>
-            <a href="{{ route('videos.create') }}" style="color:white;">Add New Video</a>
-        </button>
-        <script> 
+            <button>
+                <a href="{{ route('admin.videos.create') }}" style="color:white;">Add New Video</a>
+            </button>
+            <script>
                 function searchTable() {
                     var input = document.getElementById("searchInput");
                     var filter = input.value.toLowerCase();
@@ -207,13 +208,12 @@
 
                 function exportTableToCSV(filename) {
                     var csv = [];
-                
             </script>
         </div>
         @if (session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
-        </div>
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
         @endif
 
         <table>
@@ -227,41 +227,43 @@
             </thead>
             <tbody>
                 @foreach ($videos as $video)
-                <tr>
-                    <td>{{ $video->title }}</td>
-                    <td>{{ $video->description }}</td>
-                    <td>
-                        <!-- عرض الفيديو في مربع صغير -->
-                        <video controls class="video-preview">
-                            <source src="{{ asset( $video->video_path) }}" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
-                    </td>
-                    <td>
-                        <!-- View Icon -->
-                        <a href="{{ route('videos.show', $video->id) }}" title="View">
-                            <i class="fas fa-eye" style="color: #009879; font-size: 18px;"></i>
-                        </a>
+                    <tr>
+                        <td>{{ $video->title }}</td>
+                        <td>{{ $video->description }}</td>
+                        <td>
+                            <!-- عرض الفيديو في مربع صغير -->
+                            <video controls class="video-preview">
+                                <source src="{{ asset($video->video_path) }}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </td>
+                        <td>
+                            <!-- View Icon -->
+                            <a href="{{ route('admin.videos.show', $video->id) }}" title="View">
+                                <i class="fas fa-eye" style="color: #009879; font-size: 18px;"></i>
+                            </a>
 
-                        <!-- Edit Icon -->
-                        <a href="{{ route('videos.edit', $video->id) }}" title="Edit">
-                            <i class="fas fa-pen" style="color: #ff9800; font-size: 18px; margin-left: 8px;"></i>
-                        </a>
+                            <!-- Edit Icon -->
+                            <a href="{{ route('admin.videos.edit', $video->id) }}" title="Edit">
+                                <i class="fas fa-pen" style="color: #ff9800; font-size: 18px; margin-left: 8px;"></i>
+                            </a>
 
-                        <!-- Delete Icon -->
-                        <form action="{{ route('videos.destroy', $video->id) }}" method="POST" style="display: inline;">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" title="Delete" 
-                                style="background: none; border: none; cursor: pointer;"
-                                onclick="return confirm('Are you sure you want to delete this video?')">
-                                <i class="fas fa-trash-alt" style="color: #ff4d4d; font-size: 18px; margin-left: 8px;"></i>
-                            </button>
-                        </form>
-                    </td>
-                </tr>
+                            <!-- Delete Icon -->
+                            <form action="{{ route('admin.videos.destroy', $video->id) }}" method="POST"
+                                style="display: inline;">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" title="Delete"
+                                    style="background: none; border: none; cursor: pointer;"
+                                    onclick="return confirm('Are you sure you want to delete this video?')">
+                                    <i class="fas fa-trash-alt"
+                                        style="color: #ff4d4d; font-size: 18px; margin-left: 8px;"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
-</x-app-layout>
+@endsection

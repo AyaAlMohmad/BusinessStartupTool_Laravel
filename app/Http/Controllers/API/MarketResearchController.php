@@ -40,11 +40,11 @@ class MarketResearchController extends Controller
     {
         $validatedData = $request->validate([
             'target_customer_name' => 'nullable|string',
-            'age' => 'nullable|integer',
+            'age' => 'nullable|string',
             'gender' => 'nullable|string',
             'other' => 'nullable|string',
             'employment' => 'nullable|string',
-            'income' => 'nullable|numeric',
+            'income' => 'nullable|string',
             'education' => 'nullable|string',
             'must_have_solutions' => 'nullable|array',
             'should_have_solutions' => 'nullable|array',
@@ -93,11 +93,11 @@ class MarketResearchController extends Controller
 
         $validatedData = $request->validate([
             'target_customer_name' => 'nullable|string',
-            'age' => 'nullable|integer',
+            'age' => 'nullable|string',
             'gender' => 'nullable|string',
             'other' => 'nullable|string',
             'employment' => 'nullable|string',
-            'income' => 'nullable|numeric',
+            'income' => 'nullable|string',
             'education' => 'nullable|string',
             'must_have_solutions' => 'nullable|array',
             'should_have_solutions' => 'nullable|array',

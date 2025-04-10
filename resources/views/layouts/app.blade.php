@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>Valuenation</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -13,7 +13,23 @@
         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-      
+            <style>
+                .icon-blue {
+                    color: #3b82f6;
+                    transition: color 0.2s ease;
+                }
+                .icon-blue:hover {
+                    color: #1d4ed8;
+                }
+                
+                .icon-red {
+                    color: #f63b44;
+                    transition: color 0.2s ease;
+                }
+                .icon-red:hover {
+                    color: #bb0b0b;
+                }
+            </style>
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
@@ -29,11 +45,21 @@
                     </div>
                 </header>
             @endisset
+            <div class="flex">
+                <!-- Sidebar Container -->
+                {{-- <aside class="w-64 min-h-screen bg-white border-r"> --}}
+    
+                    <!-- Navigation Menu -->
+                   {{-- @include('layouts.sidebar') --}}
+                {{-- </aside> --}}
+    
+                <!-- Main Content -->
 
-            <!-- Page Content -->
-            <main>
-                {{ $slot }}
-            </main>
+            @include('layouts.sidebar')
+                <!-- Page Content -->
+                <main class="flex-1 mx-auto w-1/2 p-8">
+                  @yield('content')
+                </main>
         </div>
     </body>
 </html>

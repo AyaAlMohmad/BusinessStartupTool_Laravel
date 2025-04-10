@@ -1,4 +1,5 @@
-<x-app-layout>
+@extends('layouts.app')
+@section('content')
     <style>
         .custom-button {
             background-color: #4CAF50; 
@@ -22,7 +23,7 @@
     
     <div class="container mx-auto px-4 py-8">
         <h1 class="text-3xl font-bold text-gray-800 mb-6">Add Video</h1>
-        <form action="{{ route('videos.store') }}" method="POST" enctype="multipart/form-data" class="bg-white p-6 rounded-lg shadow-md">
+        <form action="{{ route('admin.videos.store') }}" method="POST" enctype="multipart/form-data" class="bg-white p-6 rounded-lg shadow-md">
             @csrf
             <!-- Title Field (Dropdown) -->
             <div class="mb-4">
@@ -61,4 +62,4 @@
             </div>
         </form>
     </div>
-</x-app-layout>
+@endsection

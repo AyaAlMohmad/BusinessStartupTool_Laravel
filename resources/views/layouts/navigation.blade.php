@@ -13,32 +13,7 @@
                     </a>
                 </div>
 
-                <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    
-                    <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
-                        <i class="fas fa-dollar-sign icon"></i>
-                        {{ __('Financial Insights') }}
-                    </x-nav-link>
-                </div>
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('admin.ProgressAnalytics')" :active="request()->routeIs('admin.ProgressAnalytics')">
-                        <i class="fas fa-chart-line icon"></i>
-                        {{ __('Progress Analytics') }}
-                    </x-nav-link>
-                </div>
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.index')">
-                        <i class="fas fa-users icon"></i>
-                        {{ __('User Management') }}
-                    </x-nav-link>
-                </div>
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('admin.videos.index')" :active="request()->routeIs('admin.videos.index')">
-                        <i class="fas fa-chart-video icon"></i>
-                        {{ __('Video Management') }}
-                    </x-nav-link>
-                </div>
+             
             </div>
 
             <!-- Settings Dropdown -->

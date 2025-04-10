@@ -1,4 +1,5 @@
-<x-app-layout>
+@extends('layouts.app')
+@section('content')
     <style>
         .custom-button {
             background-color: #4CAF50; 
@@ -21,7 +22,7 @@
     </style>
     <div class="container mx-auto px-4 py-8">
 
-        <form action="{{ route('videos.update', $video->id) }}" method="POST" enctype="multipart/form-data" class="bg-white p-6 rounded-lg shadow-md">
+        <form action="{{ route('admin.videos.update', $video->id) }}" method="POST" enctype="multipart/form-data" class="bg-white p-6 rounded-lg shadow-md">
             @csrf
             @method('PUT')
             <!-- Title Field -->
@@ -71,4 +72,4 @@
             </div>
         </form>
     </div>
-</x-app-layout>
+@endsection

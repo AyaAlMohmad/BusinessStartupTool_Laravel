@@ -1,4 +1,5 @@
-<x-app-layout>
+@extends('layouts.app')
+@section('content')
     <style>
         .container {
             max-width: 800px; 
@@ -58,6 +59,6 @@
             </video>
         </div>
         <p>{{ $video->description }}</p>
-        <a href="{{ route('videos.index') }}" class="btn btn-secondary">Back to List</a>
+        <a href="{{ route('admin.videos.index') }}" class="btn btn-secondary">Back to List</a>
     </div>
-</x-app-layout>
+@endsection

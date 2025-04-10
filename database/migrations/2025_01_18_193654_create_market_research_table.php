@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreign('business_id')->references('id')->on('businesses')->onDelete('cascade');
 
             $table->string('target_customer_name')->nullable();
-            $table->integer('age')->nullable();
+            $table->string('age')->nullable();
             $table->string('income')->nullable();
             $table->string('employment')->nullable();
             $table->string('gender')->nullable();

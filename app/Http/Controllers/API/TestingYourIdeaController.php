@@ -32,23 +32,23 @@ class TestingYourIdeaController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'desirability' => 'required|array',
-            'desirability.solves_problem' => 'required|boolean',
-            'desirability.problem_statement' => 'required|array',
-            'desirability.existing_solutions_used' => 'required|boolean',
+            'desirability' => 'nullable|array',
+            'desirability.solves_problem' => 'nullable|boolean',
+            'desirability.problem_statement' => 'nullable|array',
+            'desirability.existing_solutions_used' => 'nullable|boolean',
             'desirability.current_solutions_details' => 'nullable|array',
             'desirability.switch_reason' => 'nullable|array',
             'desirability.notes' => 'nullable|array',
             
-            'feasibility' => 'required|array',
-            'feasibility.required_skills' => 'required|array',
-            'feasibility.qualifications_permits' => 'required|array',
+            'feasibility' => 'nullable|array',
+            'feasibility.nullable_skills' => 'nullable|array',
+            'feasibility.qualifications_permits' => 'nullable|array',
             'feasibility.notes' => 'nullable|array',
             
-            'viability' => 'required|array',
-            'viability.payment_possible' => 'required|array',
-            'viability.profitability' => 'required|array',
-            'viability.finances_details' => 'required|array',
+            'viability' => 'nullable|array',
+            'viability.payment_possible' => 'nullable|array',
+            'viability.profitability' => 'nullable|array',
+            'viability.finances_details' => 'nullable|array',
             'viability.notes' => 'nullable|array',
         ]);
 
@@ -98,23 +98,23 @@ class TestingYourIdeaController extends Controller
             ->firstOrFail();
 
             $validator = Validator::make($request->all(), [
-                'desirability' => 'required|array',
-                'desirability.solves_problem' => 'required|boolean',
-                'desirability.problem_statement' => 'required|array',
-                'desirability.existing_solutions_used' => 'required|boolean',
+                'desirability' => 'nullable|array',
+                'desirability.solves_problem' => 'nullable|boolean',
+                'desirability.problem_statement' => 'nullable|array',
+                'desirability.existing_solutions_used' => 'nullable|boolean',
                 'desirability.current_solutions_details' => 'nullable|array',
                 'desirability.switch_reason' => 'nullable|array',
                 'desirability.notes' => 'nullable|array',
                 
-                'feasibility' => 'required|array',
-                'feasibility.required_skills' => 'required|array',
-                'feasibility.qualifications_permits' => 'required|array',
+                'feasibility' => 'nullable|array',
+                'feasibility.nullable_skills' => 'nullable|array',
+                'feasibility.qualifications_permits' => 'nullable|array',
                 'feasibility.notes' => 'nullable|array',
                 
-                'viability' => 'required|array',
-                'viability.payment_possible' => 'required|array',
-                'viability.profitability' => 'required|array',
-                'viability.finances_details' => 'required|array',
+                'viability' => 'nullable|array',
+                'viability.payment_possible' => 'nullable|array',
+                'viability.profitability' => 'nullable|array',
+                'viability.finances_details' => 'nullable|array',
                 'viability.notes' => 'nullable|array',
             ]);
 
