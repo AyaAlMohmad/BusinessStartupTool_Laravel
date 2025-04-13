@@ -41,7 +41,7 @@ class TestingYourIdeaController extends Controller
             'desirability.notes' => 'nullable|array',
             
             'feasibility' => 'nullable|array',
-            'feasibility.nullable_skills' => 'nullable|array',
+            'feasibility.required_skills' => 'nullable|array',
             'feasibility.qualifications_permits' => 'nullable|array',
             'feasibility.notes' => 'nullable|array',
             
@@ -107,7 +107,7 @@ class TestingYourIdeaController extends Controller
                 'desirability.notes' => 'nullable|array',
                 
                 'feasibility' => 'nullable|array',
-                'feasibility.nullable_skills' => 'nullable|array',
+                'feasibility.required_skills' => 'nullable|array',
                 'feasibility.qualifications_permits' => 'nullable|array',
                 'feasibility.notes' => 'nullable|array',
                 

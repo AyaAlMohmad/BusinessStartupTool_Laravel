@@ -7,10 +7,12 @@ use App\Http\Controllers\API\BusinessController;
 use App\Http\Controllers\API\FinancialPlanningController;
 use App\Http\Controllers\API\BusinessIdeaController;
 use App\Http\Controllers\API\BusinessSetupController;
+use App\Http\Controllers\API\ConversionRateController;
 use App\Http\Controllers\API\DownloadController;
 use App\Http\Controllers\API\LaunchPreparationController;
 use App\Http\Controllers\API\MarketingChannelController;
 use App\Http\Controllers\API\MarketingController;
+use App\Http\Controllers\API\MarketingNewController;
 use App\Http\Controllers\API\MarketResearchController;
 use App\Http\Controllers\API\MVPDevelopmentController;
 use App\Http\Controllers\API\SalesStrategyController;
@@ -49,6 +51,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanc
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('businesses', BusinessController::class);
+    Route::apiResource('marketing-new', MarketingNewController::class);
     Route::get('businesses/{business}/logs', [BusinessController::class, 'showLogs']);
     Route::apiResource('testing-ideas', TestingYourIdeaController::class);
 // Business Idea Routes
@@ -102,4 +105,5 @@ Route::apiResource('mvp-development', MVPDevelopmentController::class);
 Route::apiResource('launch-preparations', LaunchPreparationController::class);
 
 Route::apiResource('sales-strategies', SalesStrategyController::class);
+Route::apiResource('sales-conversion-notes', ConversionRateController::class);
 });
