@@ -25,7 +25,7 @@ class SalesStrategyController extends Controller
     {
         $validatedData = $request->validate([
             'sales_channels' => 'nullable|array',
-            'sales_channels.*.name' => 'nullable|string', // استخدام * للتعامل مع المصفوفات
+            'sales_channels.*.name' => 'nullable|string', 
             'sales_channels.*.description' => 'nullable|string',
             'sales_channels.*.target_revenue' => 'nullable|numeric',
             'sales_channels.*.commission_structure' => 'nullable|string',
@@ -42,7 +42,7 @@ class SalesStrategyController extends Controller
             'sales_teams' => 'nullable|array',
             'sales_teams.*.role' => 'nullable|string',
             'sales_teams.*.responsibilities' => 'nullable|string',
-            'sales_teams.*.required_skills' => 'nullable|string', // تأكد من أن الاسم مطابق
+            'sales_teams.*.required_skills' => 'nullable|string', 
             'sales_teams.*.target_metrics' => 'nullable|string',
         ]);
 
@@ -131,7 +131,7 @@ class SalesStrategyController extends Controller
             'sales_teams' => 'nullable|array',
             'sales_teams.*.role' => 'sometimes|nullable|string',
             'sales_teams.*.responsibilities' => 'sometimes|nullable|string',
-            'sales_teams.*.required_skills' => 'sometimes|nullable|string', // تأكد من وجوده هنا
+            'sales_teams.*.required_skills' => 'sometimes|nullable|string', 
             'sales_teams.*.target_metrics' => 'sometimes|nullable|string',
         ]);
     
@@ -170,7 +170,7 @@ class SalesStrategyController extends Controller
                 $salesStrategy->salesTeams()->create([
                     'role' => $team['role'] ?? null,
                     'responsibilities' => $team['responsibilities'] ?? null,
-                    'required_skills' => $team['required_skills'] ?? null, // تأكد من تعيينه هنا
+                    'required_skills' => $team['required_skills'] ?? null, 
                     'target_metrics' => $team['target_metrics'] ?? null,
                     'user_id' => $team['user_id'],
                     'business_id' => $businessId

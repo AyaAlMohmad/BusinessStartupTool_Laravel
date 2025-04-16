@@ -51,7 +51,7 @@ class AuditLog extends Model
             }
         }
     
-        return implode('<br>', $result); // لعرض كل زوج في سطر
+        return implode('<br>', $result); 
     }
     
     private function isArabic($text)

@@ -11,12 +11,12 @@ class MarketResearch extends Model
     protected $fillable = [
         'target_customer_name',
         'age',
+        'gender',
         'income',
         'education',
         'must_have_solutions',
         'should_have_solutions',
         'nice_to_have_solutions','user_id',
-            'gender',
         'other',
         'employment',
         'nots',

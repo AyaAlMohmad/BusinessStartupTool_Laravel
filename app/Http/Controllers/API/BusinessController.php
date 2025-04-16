@@ -10,7 +10,7 @@ use Illuminate\Http\Response;
 
 class BusinessController extends Controller
 {
-    // الحصول على قائمة الأعمال
+   
     public function index()
     {
         $businesses = Business::where('user_id', auth()->id())->get();
@@ -28,7 +28,7 @@ class BusinessController extends Controller
         ],200);
     }
 
-    // إنشاء عمل جديد
+   
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -47,7 +47,6 @@ class BusinessController extends Controller
         ], Response::HTTP_CREATED);
     }
 
-    // عرض سجلات التعديلات لعمل معين
     public function showLogs($businessId)
     {
         $business = Business::findOrFail($businessId);
@@ -66,7 +65,7 @@ class BusinessController extends Controller
         ],200);
     }
 
-    // تحديث بيانات العمل
+
     public function update(Request $request, $businessId)
     {
         $business = Business::findOrFail($businessId);
@@ -84,7 +83,6 @@ class BusinessController extends Controller
         ], 200);
     }
 
-    // حذف عمل
     public function destroy($businessId)
     {
         $business = Business::findOrFail($businessId);

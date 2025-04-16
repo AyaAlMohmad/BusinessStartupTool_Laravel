@@ -64,11 +64,11 @@ Route::prefix('business-ideas')->group(function() {
 
 
 Route::prefix('simple-solutions')->middleware('auth:sanctum')->group(function () {
-    Route::get('/', [SimpleSolutionController::class, 'index']);           // عرض أحدث سجل
-    Route::post('/', [SimpleSolutionController::class, 'store']);          // إنشاء جديد
-    Route::get('/{id}', [SimpleSolutionController::class, 'show']);        // عرض سجل واحد
-    Route::put('/{id}', [SimpleSolutionController::class, 'update']);      // تعديل سجل
-    Route::delete('/{id}', [SimpleSolutionController::class, 'destroy']);  // حذف سجل
+    Route::get('/', [SimpleSolutionController::class, 'index']);          
+    Route::post('/', [SimpleSolutionController::class, 'store']);          
+    Route::get('/{id}', [SimpleSolutionController::class, 'show']);        
+    Route::put('/{id}', [SimpleSolutionController::class, 'update']);      
+    Route::delete('/{id}', [SimpleSolutionController::class, 'destroy']);  
 });
 
 Route::get('/download-business-data', [DownloadController::class, 'downloadBusinessData']);

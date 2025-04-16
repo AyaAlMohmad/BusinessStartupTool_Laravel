@@ -56,13 +56,13 @@ class LaunchPreparationController extends Controller
     $validatedData['user_id'] = Auth::id();
     $validatedData['business_id'] = $businessId;
 
-    // إنشاء LaunchPreparation
+   
     $launchPreparation = LaunchPreparation::create([
         'user_id' => $validatedData['user_id'],
         'business_id' => $validatedData['business_id']
     ]);
 
-    // إنشاء LaunchChecklists
+   
     if (isset($validatedData['launch_checklists'])) {
         foreach ($validatedData['launch_checklists'] as $checklist) {
             $checklist['user_id'] = $validatedData['user_id'];
@@ -71,7 +71,6 @@ class LaunchPreparationController extends Controller
         }
     }
 
-    // إنشاء MarketingActivities
     if (isset($validatedData['marketing_activities'])) {
         foreach ($validatedData['marketing_activities'] as $activity) {
             $activity['user_id'] = $validatedData['user_id'];
@@ -80,7 +79,7 @@ class LaunchPreparationController extends Controller
         }
     }
 
-    // إنشاء RiskAssessments
+  
     if (isset($validatedData['risk_assessments'])) {
         foreach ($validatedData['risk_assessments'] as $risk) {
             $risk['user_id'] = $validatedData['user_id'];
@@ -89,7 +88,7 @@ class LaunchPreparationController extends Controller
         }
     }
 
-    // إنشاء LaunchMilestones
+ 
     if (isset($validatedData['launch_milestones'])) {
         foreach ($validatedData['launch_milestones'] as $milestone) {
             $milestone['user_id'] = $validatedData['user_id'];
@@ -153,7 +152,7 @@ class LaunchPreparationController extends Controller
             'launch_milestones.*.dependencies' => 'nullable|array',
         ]);
     
-        // تحديث أو إنشاء LaunchChecklists
+      
         if (isset($validatedData['launch_checklists'])) {
             $launchPreparation->launchChecklists()->delete();
             foreach ($validatedData['launch_checklists'] as $checklist) {
@@ -163,7 +162,7 @@ class LaunchPreparationController extends Controller
             }
         }
     
-        // تحديث أو إنشاء MarketingActivities
+      
         if (isset($validatedData['marketing_activities'])) {
             $launchPreparation->marketingActivities()->delete();
             foreach ($validatedData['marketing_activities'] as $activity) {
@@ -173,7 +172,7 @@ class LaunchPreparationController extends Controller
             }
         }
     
-        // تحديث أو إنشاء RiskAssessments
+   
         if (isset($validatedData['risk_assessments'])) {
             $launchPreparation->riskAssessments()->delete();
             foreach ($validatedData['risk_assessments'] as $risk) {
@@ -183,7 +182,7 @@ class LaunchPreparationController extends Controller
             }
         }
     
-        // تحديث أو إنشاء LaunchMilestones
+    
         if (isset($validatedData['launch_milestones'])) {
             $launchPreparation->launchMilestones()->delete();
             foreach ($validatedData['launch_milestones'] as $milestone) {

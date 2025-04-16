@@ -53,4 +53,16 @@ protected $table='testing_your_idea';
     {
         return $this->belongsTo(Business::class);
     }
+    public function formatForDisplay($data)
+{
+    if (is_array($data) || is_object($data)) {
+        return '<pre>' . htmlspecialchars(json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8') . '</pre>';
+    }
+    return htmlspecialchars($data ?? '', ENT_QUOTES, 'UTF-8');
+}
+
+public function isDifferent($new, $old)
+{
+    return trim(strip_tags($new)) !== trim(strip_tags($old));
+}
 }

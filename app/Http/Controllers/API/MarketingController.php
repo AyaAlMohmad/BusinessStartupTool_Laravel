@@ -51,7 +51,7 @@ class MarketingController extends Controller
         $validatedData['user_id'] = Auth::id();
         $validatedData['business_id'] = $businessId;
 
-        // إنشاء Marketing
+
         $marketing = Marketing::create([
             'user_id' => $validatedData['user_id'],
             'business_id' => $validatedData['business_id'],
@@ -60,7 +60,7 @@ class MarketingController extends Controller
             'solution_overview' => $validatedData['solution_overview'] ?? null,
         ]);
 
-        // إنشاء MarketingChannels
+  
         if (isset($validatedData['marketing_channels'])) {
             foreach ($validatedData['marketing_channels'] as $channel) {
                 $channel['user_id'] = $validatedData['user_id'];
@@ -69,7 +69,7 @@ class MarketingController extends Controller
             }
         }
 
-        // إنشاء ContentStrategies
+
         if (isset($validatedData['content_strategies'])) {
             foreach ($validatedData['content_strategies'] as $strategy) {
                 $strategy['user_id'] = $validatedData['user_id'];
@@ -78,7 +78,7 @@ class MarketingController extends Controller
             }
         }
 
-        // إنشاء BrandIdentity
+
         if (isset($validatedData['brand_identity'])) {
             $validatedData['brand_identity']['user_id'] = $validatedData['user_id'];
             $validatedData['brand_identity']['business_id'] = $validatedData['business_id'];

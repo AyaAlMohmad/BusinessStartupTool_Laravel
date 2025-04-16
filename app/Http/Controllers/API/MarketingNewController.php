@@ -15,36 +15,87 @@ use Symfony\Component\HttpFoundation\Response;
 class MarketingNewController extends Controller
 {
     
+    // public function index(Request $request)
+    // {
+    //     $businessId = $this->getValidatedBusinessId($request);
+    
+    //     $data = ProductFeature::with('marketingCampaigns')
+    //         ->where('user_id', auth()->id())
+    //         ->where('business_id', $businessId)
+    //         ->latest()
+    //         ->get()
+    //         ->map(function ($feature) {
+    //             return [
+    //                 'productFeature' => [
+    //                     'id' => $feature->id,
+    //                     'options' => $feature->options,
+    //                     'notes' => $feature->notes,
+    //                 ],
+    //                 'marketingCampaigns' => $feature->marketingCampaigns->map(function ($campaign) {
+    //                     return [
+    //                         'goal' => $campaign->goal,
+    //                         'audience' => $campaign->audience,
+    //                         'format' => $campaign->format,
+    //                         'channels' => $campaign->channels,
+    //                         'notes' => $campaign->notes,
+    //                     ];
+    //                 }),
+    //             ];
+    //         });
+    
+    //     return response()->json([
+    //         'data' => $data,
+    //         'message' => 'Combined data retrieved successfully'
+    //     ]);
+    // }
     public function index(Request $request)
-    {
-        $businessId = $this->getValidatedBusinessId($request);
+{
+    $businessId = $this->getValidatedBusinessId($request);
 
-        $data = ProductFeature::with('marketingCampaigns')
-            ->where('user_id', auth()->id())
-            ->where('business_id', $businessId)
-            ->latest()
-            ->get();
+    // Get the latest record using first() instead of get()
+    $feature = ProductFeature::with('marketingCampaigns')
+        ->where('user_id', auth()->id())
+        ->where('business_id', $businessId)
+        ->latest()
+        ->first();
 
-        return response()->json([
-            'data' => $data,
-            'message' => 'Combined data retrieved successfully'
-        ]);
-    }
+    // Prepare data if record exists
+    $data = $feature ? [
+        'productFeature' => [
+            'id' => $feature->id,
+            'options' => $feature->options,
+            'notes' => $feature->notes,
+        ],
+        'marketingCampaigns' => $feature->marketingCampaigns->map(function ($campaign) {
+            return [
+                'goal' => $campaign->goal,
+                'audience' => $campaign->audience,
+                'format' => $campaign->format,
+                'channels' => $campaign->channels,
+                'notes' => $campaign->notes,
+            ];
+        }),
+    ] : null;
 
+    return response()->json([
+        'data' => $data,
+        'message' => 'Last update retrieved successfully'
+    ]);
+}
     public function store(Request $request)
     {
         $businessId = $this->getValidatedBusinessId($request);
     
         $validator = Validator::make($request->all(), [
-      
-            'product_feature.options' => 'nullable|array',
-            'product_feature.notes' => 'nullable|array',
-            
-            'marketing_campaign.goal' => 'nullable|array',
-            'marketing_campaign.audience' => 'nullable|array',
-            'marketing_campaign.format' => 'nullable|array',
-            'marketing_campaign.channels' => 'nullable|array',
-            'marketing_campaign.notes' => 'nullable|array',
+            'productFeature.options' => 'nullable|array',
+            'productFeature.notes' => 'nullable|string',
+    
+            'marketingCampaigns' => 'nullable|array',
+            'marketingCampaigns.*.goal' => 'nullable|string',
+            'marketingCampaigns.*.audience' => 'nullable|string',
+            'marketingCampaigns.*.format' => 'nullable|string',
+            'marketingCampaigns.*.channels' => 'nullable|string',
+            'marketingCampaigns.*.notes' => 'nullable|string',
         ]);
     
         if ($validator->fails()) {
@@ -57,10 +108,7 @@ class MarketingNewController extends Controller
         try {
             DB::beginTransaction();
     
-            // الحصول على بيانات product_feature مع القيم الافتراضية
-            $productFeatureData = $request->input('product_feature', []);
-            
-            // Create Product Feature
+            $productFeatureData = $request->input('productFeature', []);
             $productFeature = ProductFeature::create(array_merge(
                 [
                     'user_id' => auth()->id(),
@@ -69,27 +117,33 @@ class MarketingNewController extends Controller
                 $productFeatureData
             ));
     
-            // الحصول على بيانات marketing_campaign مع القيم الافتراضية
-            $marketingCampaignData = $request->input('marketing_campaign', []);
-            
-            // Create Marketing Campaign
-            $marketingCampaign = $productFeature->marketingCampaigns()->create(array_merge(
-                [
-                    'user_id' => auth()->id(),
-                    'business_id' => $businessId,
-                ],
-                $marketingCampaignData
-            ));
+            $marketingCampaigns = $request->input('marketingCampaigns', []);
+            foreach ($marketingCampaigns as $campaignData) {
+                $productFeature->marketingCampaigns()->create(array_merge(
+                    [
+                        'user_id' => auth()->id(),
+                        'business_id' => $businessId,
+                    ],
+                    $campaignData
+                ));
+            }
     
             DB::commit();
     
-            return response()->json([
-                'data' => [
-                    'product_feature' => $productFeature,
-                    'marketing_campaign' => $marketingCampaign
-                ],
-                'message' => 'Records created successfully'
-            ], 201);
+          return response()->json([
+    'data' => [
+        'productFeature' => [
+            'id' => $productFeature->id,
+            'options' => $productFeature->options,
+            'notes' => $productFeature->notes,
+            'created_at' => $productFeature->created_at,
+            'updated_at' => $productFeature->updated_at,
+            'marketing_campaigns' => $productFeature->marketingCampaigns, // فقط هنا
+        ],
+    ],
+    'message' => 'Records created successfully'
+], 201);
+
     
         } catch (\Exception $e) {
             DB::rollBack();
@@ -99,72 +153,97 @@ class MarketingNewController extends Controller
             ], 500);
         }
     }
-
+    
     public function show(Request $request, $id)
     {
         $businessId = $this->getValidatedBusinessId($request);
-
+    
         $productFeature = ProductFeature::with('marketingCampaigns')
             ->where('id', $id)
             ->where('user_id', auth()->id())
             ->where('business_id', $businessId)
             ->firstOrFail();
-
+    
         return response()->json([
-            'data' => $productFeature,
+            'data' => [
+                'productFeature' => [
+                    'id' => $productFeature->id,
+                    'options' => $productFeature->options,
+                    'notes' => $productFeature->notes,
+                ],
+                'marketingCampaigns' => $productFeature->marketingCampaigns->map(function ($campaign) {
+                    return [
+                        'goal' => $campaign->goal,
+                        'audience' => $campaign->audience,
+                        'format' => $campaign->format,
+                        'channels' => $campaign->channels,
+                        'notes' => $campaign->notes,
+                    ];
+                }),
+            ],
             'message' => 'Record retrieved successfully'
         ]);
     }
-
+    
     public function update(Request $request, $id)
     {
         $businessId = $this->getValidatedBusinessId($request);
-
+    
         $validator = Validator::make($request->all(), [
-       
-            'product_feature.options' => 'nullable|array',
-            'product_feature.notes' => 'nullable|array',
-            
-            'marketing_campaign.goal' => 'nullable|array',
-            'marketing_campaign.audience' => 'nullable|array',
-            'marketing_campaign.format' => 'nullable|array',
-            'marketing_campaign.channels' => 'nullable|array',
-            'marketing_campaign.notes' => 'nullable|array',
+            'productFeature.options' => 'nullable|array',
+            'productFeature.notes' => 'nullable|string',
+    
+            'marketingCampaigns' => 'nullable|array',
+            'marketingCampaigns.*.goal' => 'nullable|string',
+            'marketingCampaigns.*.audience' => 'nullable|string',
+            'marketingCampaigns.*.format' => 'nullable|string',
+            'marketingCampaigns.*.channels' => 'nullable|string',
+            'marketingCampaigns.*.notes' => 'nullable|string',
         ]);
-
+    
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation error',
                 'errors' => $validator->errors()
             ], 422);
         }
-
+    
         try {
             DB::beginTransaction();
-
-            // Update Product Feature
+    
             $productFeature = ProductFeature::where('id', $id)
                 ->where('user_id', auth()->id())
                 ->where('business_id', $businessId)
                 ->firstOrFail();
-
-            $productFeature->update($request->input('product_feature', []));
-
-            // Update Marketing Campaign
-            if ($request->has('marketing_campaign')) {
-                $productFeature->marketingCampaigns()->updateOrCreate(
-                    ['product_feature_id' => $id],
-                    $request->input('marketing_campaign')
-                );
+    
+            $productFeature->update($request->input('productFeature', []));
+    
+             $productFeature->marketingCampaigns()->delete();
+            foreach ($request->input('marketingCampaigns', []) as $campaignData) {
+                $productFeature->marketingCampaigns()->create(array_merge(
+                    [
+                        'user_id' => auth()->id(),
+                        'business_id' => $businessId,
+                    ],
+                    $campaignData
+                ));
             }
-
+    
             DB::commit();
-
+    
             return response()->json([
-                'data' => $productFeature->load('marketingCampaigns'),
+                'data' => [
+        'productFeature' => [
+            'id' => $productFeature->id,
+            'options' => $productFeature->options,
+            'notes' => $productFeature->notes,
+            'created_at' => $productFeature->created_at,
+            'updated_at' => $productFeature->updated_at,
+            'marketing_campaigns' => $productFeature->marketingCampaigns, // فقط هنا
+        ],],
                 'message' => 'Records updated successfully'
             ]);
-
+    
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([

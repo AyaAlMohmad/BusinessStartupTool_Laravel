@@ -56,27 +56,33 @@
         // Second chart (Field-Based Modifications)
         var fieldCtx = document.getElementById('fieldChart').getContext('2d');
         new Chart(fieldCtx, {
-            type: 'pie',
-            data: {
-                labels: {!! json_encode(array_keys($fieldCounts)) !!},
-                datasets: [{
-                    data: {!! json_encode(array_values($fieldCounts)) !!},
-                    backgroundColor: [
-                        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
-                        '#9966FF', '#FF9F40', '#8B0000', '#00FF00'
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Modification Ratio by Field'
-                    }
-                }
+    type: 'pie',
+    data: {
+        labels: {!! json_encode(array_keys($fieldCounts)) !!},
+        datasets: [{
+            data: {!! json_encode(array_values($fieldCounts)) !!},
+            backgroundColor: [
+                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+                '#9966FF', '#FF9F40', '#8B0000', '#00FF00'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            title: {
+                display: true,
+                text: 'Modification Ratio by Field'
             }
-        });
+        },
+        // ↓↓↓ أضف هذا الجزء لتصغير حجم الدائرة ↓↓↓
+        layout: {
+            padding: 20
+        },
+        radius: '60%' // مثلاً 60% من حجم الـ container بدل الحجم الافتراضي (الذي هو غالباً 90% أو 100%)
+    }
+});
+
     });
 </script>
 @endsection

@@ -27,12 +27,12 @@ class BusinessIdea extends Model
     {
         $items = $this->$attribute;
     
-        // إذا null، نحوله لمصفوفة فاضية
+       
         if (is_null($items)) {
             $items = [];
         }
     
-        // إذا مش مصفوفة، نحاول نحوله
+        
         if (!is_array($items)) {
             $items = json_decode(json_encode($items), true);
         }

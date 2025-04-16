@@ -40,7 +40,7 @@ class BusinessIdeaController extends Controller
             $modificationsPerDay[$date] = ($modificationsPerDay[$date] ?? 0) + 1;
         }
     
-        // تحويل modificationsPerDay إلى Collection مرتبة
+    
         $modificationsPerDay = collect($modificationsPerDay)->map(function ($count, $date) {
             return ['date' => $date, 'count' => $count];
         })->sortBy('date')->values();
