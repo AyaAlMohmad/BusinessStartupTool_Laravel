@@ -46,6 +46,6 @@ class ConversionRate extends Model
 
     public function getTotalReachAttribute()
     {
-        return $this->total_interactions * $this->engagement_needed;
+        return $this->total_interactions * $this->reach_needed ;
     }
 }
